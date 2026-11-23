@@ -1,6 +1,9 @@
 # LaLaMo-Mado
 
-Review Markdown in the browser, with Claude Code in the loop.
+[![Tested with Claude Code](https://img.shields.io/badge/tested%20with-Claude%20Code-D97757)](https://claude.com/claude-code)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+Review Markdown in the browser, with your agent in the loop.
 
 The agent opens a `.md` file in a browser window.
 You read it there and annotate: comment on a sentence, label a block, ask a question, mark what to remove or where to insert.
@@ -11,12 +14,14 @@ The tool itself is called `edit-md`: that is what you install, and `/edit-md` is
 
 ## Why
 
-Plans, specs and long answers an agent writes are hard to review in a chat window.
-You end up quoting lines back, the agent re-reads or re-prints the whole thing, and the context fills with copies of one document.
+Your attention is the scarce part of working with an agent, and the usual surfaces spend it.
+In a chat pane you quote lines back, scroll for the answer to your third question, and watch the agent re-read or re-print the document until the context is full of copies of it.
+Editor extensions bolt review onto tools built for writing code.
+Dictation into a prompt box hands the agent text it cannot trust.
 
 Here the file stays on disk.
 The page shows it rendered, and you point at the exact spot you mean.
-The agent receives `{label, text, quote, lines}` and reads only the lines it needs.
+The agent receives `{label, text, quote, lines}`, reads only the lines it needs, and answers next to what you marked.
 
 ## What it does
 
@@ -29,13 +34,65 @@ The agent receives `{label, text, quote, lines}` and reads only the lines it nee
   Separate runs keep the session's context clean.
 - **Agent marks.** The agent highlights spans for you: decisions to take, risks, the findings of a 🔍 Seek, each listed in the left pane.
 - **Diff since you last looked.** Blocks changed since you last saw the document are marked, even across sessions.
-- **Dictation.** Ctrl+D dictates into a comment through Chrome's speech service, in English or Czech.
-  An optional local Whisper model transcribes on your PC instead.
-  ✨ Fix asks the agent to correct misheard words against the document, and a glossary of your terms learns from your corrections.
+- **Dictation the agent can read.** Ctrl+D dictates into a comment, in English or Czech, through Chrome's speech service or a local Whisper model.
+  The agent is told which words you spoke and which you typed; see [Speak your review](#speak-your-review).
 - **Skills in comments.** Ctrl+Space inserts a `/skill` name from your own and the repo's skills.
 - **Rendering.** Server-side Markdig with source-line mapping; Mermaid diagrams and front matter render and can be annotated.
 - **Settings the agent can change.** ⚙ lists every setting; the agent reads and changes them with `edit-md settings`, and the open page updates at once.
-- **A page meant to be tailored.** The client is plain HTML, JS and CSS with no build step; changed files go into an overlay folder that survives reinstalls.
+- **A page that is yours.** Plain HTML, JS and CSS with no build step, on a server that does the heavy lifting; see [Make it yours](#make-it-yours).
+
+## Speak your review
+
+Dictation into a prompt box ends up as text in the prompt.
+Nothing tells the agent which words you spoke and which you typed, so a misheard word reads like an instruction, and you cannot teach the recognizer your own terms.
+
+The review page silently tags every character of a comment as spoken or typed.
+Say *the secret results should stay in the pain*, type *seek* over *secret*, then type *see XTbl* at the end, and the agent receives:
+
+```json
+{"text": "the seek results should stay in the pain see XTbl",
+ "dictated": true,
+ "spoken": ["the", "results should stay in the pain"]}
+```
+
+The typed words, *seek* and *XTbl*, it takes exactly as written and never "fixes".
+The spoken ones it reads against the document: *pain*, in a note about a layout, is most likely *pane*.
+
+On top of that tagging:
+
+- **The recognizer's second guesses.** Where the speech engine was unsure, its alternatives travel with the comment as `maybe`.
+  In Czech dictation the English *seek* can come through as *jí*, with *zík* among the alternatives: enough for the agent to see what you meant.
+- **✨ Fix before you send.** One click has the agent correct the misheard words in your comment against the document.
+  Its suggestion appears under the comment box and never overwrites it; *Use* takes it.
+- **A glossary that learns.** Type over a misheard term and the page offers *Remember "ex table" → XTbl*, for this repo or just for you.
+  From then on it is corrected as you speak, even while the words are still being recognized.
+- **Local Whisper that knows your words.** The optional on-PC model takes the glossary as its prompt.
+  In the end-to-end test, a Czech voice saying the made-up term *XTbl* comes out as "Rex Table" from plain Whisper, and as `XTbl` with the glossary.
+- **Two ears on one take.** Keep Local beside Chrome (a ⚙ switch), and ✨ Fix also sends Whisper's transcript of the same speech; the agent reconciles the two word by word.
+
+## Make it yours
+
+The split is deliberate: the server carries the weight, and the page is yours.
+
+The server holds what is hard to get right:
+
+- the document model, and the map from every rendered block back to its source lines;
+- anchoring a selection to exact file lines, and the diff since you last looked;
+- the event queue that wakes the agent, with delivery acknowledged and re-sent if a wake-up dies;
+- separate `claude -p` runs, the skill catalog, the glossary, Whisper, and settings in layers (PC, repo, session, document).
+
+The page is plain HTML, JavaScript and CSS with no build step, talking to that server over a small HTTP API.
+Change a file, reload, and it is changed.
+
+We think the era of one editor for everyone is ending.
+With an agent at hand, people shape their tools to how they work, and we expect most users to end up with their own spin of this one.
+Getting there is a sentence away:
+
+- **Ask from the page.** ⚙ → *Customize the page*: say what you want, and the agent changes the page for you.
+- **Overlay.** Changed copies of a few files go into `~/.claude/edit-md/client/`; the server serves them first, and a reinstall keeps them.
+- **A whole variant.** Your own client folder, run with `serve --client <dir>` or `EDIT_MD_CLIENT_DIR`.
+- **Labels and send buttons** are JSON: `comment_labels.json` and `send_buttons.json` in `~/.claude/edit-md/` (yours) or `<repo>/.claude/edit-md/` (the repo's).
+- **Settings** the agent finds and changes with `edit-md settings`; ⚙ → *Setting* or *New comment kind* asks for one from the page.
 
 ## How it works
 
@@ -52,6 +109,13 @@ flowchart LR
 - The agent drives it with short CLI calls, each printing one JSON line.
 - A backgrounded `edit-md wait` blocks until the next browser event; its exit wakes the agent, so the chat stays free while you read.
 - Each session gets its own browser window, in a dedicated Chrome, Chromium or Edge profile, never your everyday one.
+
+### Other agents
+
+LaLaMo-Mado is built and tested with Claude Code, but the idea is not tied to it: a Markdown file on disk, comments anchored to its lines, and a channel back to the agent's session.
+The core is a local server and a CLI that prints JSON, with `edit-md wait` blocking until the next event, so any agent that can run shell commands can drive the loop.
+Claude Code's own parts are the skill that teaches the loop, the background wake-up, separate runs through `claude -p`, and the skill picker, which reads `.claude/skills/`.
+Outside Claude Code there is no session ID, so set `EDIT_MD_HOME` per session, or all sessions share one server.
 
 ## Requirements
 
@@ -107,13 +171,6 @@ Default keys (⚙ lists them all):
 | Ctrl+D | start or stop dictation |
 | Ctrl+Space | insert a skill name |
 | Esc | close the topmost thing |
-
-## Tailor it
-
-- **Labels:** `comment_labels.json` in `~/.claude/edit-md/` (yours) or `<repo>/.claude/edit-md/` (the repo's).
-- **Send buttons:** `send_buttons.json`, same places: a whole way of answering in one click.
-- **The page:** copy a file from `~/.claude/bin/edit-md/client/` to `~/.claude/edit-md/client/` and edit it there.
-- Or ask from the page: ⚙ offers *Setting*, *Customize the page* and *New comment kind*, which the agent carries out.
 
 ## Develop
 
