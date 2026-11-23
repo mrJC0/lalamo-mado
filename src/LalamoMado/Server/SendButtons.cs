@@ -52,7 +52,7 @@ public sealed class SendButtons(string shippedPath, string userPath)
         StringComparer.OrdinalIgnoreCase);
 
     public static string DefaultUserPath =>
-        Environment.GetEnvironmentVariable("EDIT_MD_USER_BUTTONS") is { Length: > 0 } custom ? custom : Path.Combine(CommentLabels.ClaudeHome, "edit-md", FileName);
+        Environment.GetEnvironmentVariable("EDIT_MD_USER_BUTTONS") is { Length: > 0 } custom ? custom : Path.Combine(BuildChannel.Current.UserFilesDirectory, FileName);
 
     public EffectiveButtons For(string documentPath, ButtonList? session)
     {

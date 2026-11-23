@@ -183,6 +183,17 @@ node tests/e2e/roundtrip.mjs src/LalamoMado/bin/Debug/net10.0/edit-md
 `roundtrip.mjs` drives the real server through headless Chrome and the agent-side CLI.
 The other scripts in `tests/e2e/` need more: a local Whisper install, the network, or the real `claude` (which costs a little).
 
+To try a change in a real review without touching the edit-md you use every day, deploy the working tree as the dev build:
+
+```bash
+pwsh scripts/deploy-dev.ps1
+```
+
+It installs into `~/.claude/bin/edit-md-dev/` and writes `/edit-md-dev`, a skill for this repo only.
+The dev build has its own server state, ports, browser window and copy of your labels, glossary and settings, and its page shows a **DEV** badge, so `/edit-md` and `/edit-md-dev` can run side by side, even in one session.
+When a change is ready, install that commit as the release with `pwsh onboarding/install.ps1 -Ref <commit>`.
+`node tests/e2e/channels.mjs <release edit-md> <dev edit-md>` checks that the two never meet.
+
 | path | holds |
 |---|---|
 | `src/LalamoMado/` | the server and the CLI |

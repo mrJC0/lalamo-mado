@@ -40,7 +40,7 @@ public sealed class Glossary(string userPath)
 
     static readonly JsonSerializerOptions FileJson = new(Wire.Json) { WriteIndented = true, NewLine = "\n" };
 
-    public static string DefaultUserPath => Path.Combine(CommentLabels.ClaudeHome, "edit-md", FileName);
+    public static string DefaultUserPath => Path.Combine(BuildChannel.Current.UserFilesDirectory, FileName);
 
     static string? RepoFileOf(string documentPath) => GitRoot.Of(documentPath) is { } root ? Path.Combine(root, ".claude", "edit-md", FileName) : null;
 

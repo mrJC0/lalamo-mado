@@ -24,6 +24,7 @@ const ui = {
   doc: $("#doc"),
   page: $("#page"),
   savedAt: $("#saved-at"),
+  build: $("#build"),
   marks: $("#marks"),
   annotationList: $("#annotations"),
   empty: $("#empty"),
@@ -120,6 +121,13 @@ function showSavedAt(savedAt) {
   ui.savedAt.hidden = false;
 }
 
+const isDevBuild = () => state.view.channel === "dev";
+
+function showBuild(view) {
+  ui.build.hidden = !isDevBuild();
+  ui.build.title = `The dev build of edit-md, ${view.commit ? `built from ${view.commit}` : "a local build"} — not the released one. /edit-md-dev drives it; /edit-md drives the release.`;
+}
+
 async function loadDocument({ first }) {
   const view = await api.fetchDocument();
   if (!first && view.hash === state.view.hash) return;
@@ -127,7 +135,8 @@ async function loadDocument({ first }) {
   ui.file.textContent = view.fileName;
   ui.file.title = view.path;
   showSavedAt(new Date(view.savedAt));
-  document.title = `${view.fileName} — edit-md`;
+  showBuild(view);
+  document.title = `${isDevBuild() ? "[dev] " : ""}${view.fileName} — edit-md`;
   ui.doc.innerHTML = view.html;
   for (const link of ui.doc.querySelectorAll("a[href]")) {
     if (!link.getAttribute("href").startsWith("#")) Object.assign(link, { target: "_blank", rel: "noopener" });
@@ -734,7 +743,7 @@ function endReview(outcome) {
       el("p", { className: "muted", textContent: "The agent takes it from here in the chat. You can close this tab." }),
     ]),
   );
-  document.title = `Submitted — ${state.view.fileName}`;
+  document.title = `${isDevBuild() ? "[dev] " : ""}Submitted — ${state.view.fileName}`;
 }
 
 async function onInbox(messages, isReplay) {

@@ -16,7 +16,7 @@ public static class ReviewServer
     static readonly TimeSpan MaxLongPoll = TimeSpan.FromSeconds(55);
     static readonly FileExtensionContentTypeProvider ContentTypes = new();
 
-    public static string OverlayDirectory => Path.Combine(CommentLabels.ClaudeHome, "edit-md", "client");
+    public static string OverlayDirectory => Path.Combine(BuildChannel.Current.UserFilesDirectory, "client");
 
     public static async Task<int> RunAsync(int port, string clientDirectory)
     {
@@ -81,7 +81,7 @@ public static class ReviewServer
         api.MapGet("/status", (DocumentRegistry registry) =>
             new ServerStatus(baseUrl, Environment.ProcessId, instance, startedAt,
                 registry.All.Select(d => new DocumentStatus(d.DocId, d.Round, d.Path, DocUrl(baseUrl, d), d.BrowserConnected, d.Submitted,
-                    registry.AgentEvents.PendingFor(d.DocId))).ToArray()));
+                    registry.AgentEvents.PendingFor(d.DocId))).ToArray(), BuildChannel.Current.Name, BuildChannel.Commit));
 
         api.MapPost("/open", (OpenRequest request, DocumentRegistry registry, CommentLabels labels) =>
         {
@@ -363,6 +363,8 @@ public static class ReviewServer
             url = baseUrl,
             pid = Environment.ProcessId,
             instance,
+            channel = BuildChannel.Current.Name,
+            commit = BuildChannel.Commit,
             stateFile = ServerStateFile.FilePath,
             client = clientDirectory,
             overlay = overlayDirectory,

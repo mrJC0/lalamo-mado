@@ -134,7 +134,7 @@ public sealed partial class ReviewDocument(string docId, string path, LastSeenVe
             lastSeenSource = source;
             lastSeen.Write(Path, source);
         }
-        return new DocumentView(DocId, Path, System.IO.Path.GetFileName(Path), Html, Hash, instance, Submitted, Changes, SavedAt);
+        return new DocumentView(DocId, Path, System.IO.Path.GetFileName(Path), Html, Hash, instance, Submitted, Changes, SavedAt, BuildChannel.Current.Name, BuildChannel.Commit);
     }
 
     public bool FileChangedOnDisk()

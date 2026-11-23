@@ -45,7 +45,7 @@ public sealed class CommentLabels(string shippedPath, string userPath)
     public const string FileName = "comment_labels.json";
 
     public static string DefaultUserPath =>
-        Environment.GetEnvironmentVariable("EDIT_MD_USER_LABELS") is { Length: > 0 } custom ? custom : Path.Combine(ClaudeHome, "edit-md", FileName);
+        Environment.GetEnvironmentVariable("EDIT_MD_USER_LABELS") is { Length: > 0 } custom ? custom : Path.Combine(BuildChannel.Current.UserFilesDirectory, FileName);
 
     internal static string ClaudeHome =>
         Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR") is { Length: > 0 } configured

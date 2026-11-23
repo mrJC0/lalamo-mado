@@ -7,7 +7,7 @@ namespace LalamoMado.Cli;
 
 public static class Commands
 {
-    const string Usage = """
+    static readonly string Usage = $$"""
         edit-md — review a Markdown file in the browser and get the annotations back.
 
           edit-md serve [--port N] [--client DIR]       resident server; launch with run_in_background
@@ -34,7 +34,8 @@ public static class Commands
           edit-md events [docId]                        every event so far, delivered or not
           edit-md stop                                  shut the server down
 
-        Server state: $EDIT_MD_HOME, else <temp>/edit-md/<CLAUDE_CODE_SESSION_ID>/server.json
+        Server state: $EDIT_MD_HOME, else <temp>/{{BuildChannel.Current.HomeName}}/<CLAUDE_CODE_SESSION_ID>/server.json
+        Build: {{BuildChannel.Current.Name}}, commit {{BuildChannel.Commit ?? "unknown"}}
         """;
 
     public static async Task<int> RunAsync(string[] args)
@@ -79,14 +80,14 @@ public static class Commands
     {
         if (ServerStateFile.Read() is { } running && await ServerClient.IsAliveAsync(running))
         {
-            Print(new { status = "already-running", running.Url, running.Pid, running.Instance });
+            Print(new { status = "already-running", running.Url, running.Pid, running.Instance, channel = BuildChannel.Current.Name });
             return 0;
         }
         var clientDirectory = args.Value("client") ?? Environment.GetEnvironmentVariable("EDIT_MD_CLIENT_DIR") ?? Path.Combine(AppContext.BaseDirectory, "client");
         clientDirectory = Path.GetFullPath(clientDirectory);
         if (!File.Exists(Path.Combine(clientDirectory, "index.html")))
             return Fail($"No client at {clientDirectory} (index.html missing).");
-        return await ReviewServer.RunAsync(args.Int("port") ?? StablePort.ForSession(Environment.GetEnvironmentVariable("CLAUDE_CODE_SESSION_ID")), clientDirectory);
+        return await ReviewServer.RunAsync(args.Int("port") ?? StablePort.ForSession(Environment.GetEnvironmentVariable("CLAUDE_CODE_SESSION_ID"), BuildChannel.Current), clientDirectory);
     }
 
     static async Task<int> Open(Arguments args)

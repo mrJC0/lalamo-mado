@@ -171,11 +171,12 @@ public sealed record OpenRequest(string Path, bool LaunchBrowser = false);
 public sealed record OpenResult(string DocId, string Url, string Path, bool Reopened, bool BrowserConnected, string? Browser = null, bool? NewWindow = null, int Changes = 0, string Labels = "default");
 
 /// <param name="Changes">What changed since the page last loaded this doc; empty on a first open.</param>
-public sealed record DocumentView(string DocId, string Path, string FileName, string Html, string Hash, string Instance, bool Submitted, BlockChange[] Changes, DateTimeOffset SavedAt);
+/// <param name="Channel"><c>release</c> or <c>dev</c>: the page marks a dev build so it is never taken for the released one.</param>
+public sealed record DocumentView(string DocId, string Path, string FileName, string Html, string Hash, string Instance, bool Submitted, BlockChange[] Changes, DateTimeOffset SavedAt, string Channel, string? Commit);
 
 public sealed record DocumentStatus(string DocId, int Round, string Path, string Url, bool BrowserConnected, bool Submitted, int PendingEvents);
 
-public sealed record ServerStatus(string Url, int Pid, string Instance, DateTimeOffset StartedAt, DocumentStatus[] Docs);
+public sealed record ServerStatus(string Url, int Pid, string Instance, DateTimeOffset StartedAt, DocumentStatus[] Docs, string Channel, string? Commit);
 
 public sealed record LocatedAnnotation(string Id, string? Lines);
 

@@ -5,7 +5,7 @@ namespace LalamoMado;
 
 public sealed record ServerState(string Url, int Pid, string Instance, DateTimeOffset StartedAt);
 
-/// <summary>One resident server per Claude Code session: the state dir is keyed by CLAUDE_CODE_SESSION_ID, so parallel sessions never share a server.</summary>
+/// <summary>One resident server per Claude Code session and build channel: the state dir is keyed by both, so parallel sessions never share a server, nor do the release and dev builds in one session.</summary>
 public static class ServerStateFile
 {
     public static string Directory
@@ -16,7 +16,7 @@ public static class ServerStateFile
             if (!string.IsNullOrWhiteSpace(home))
                 return home;
             var session = Environment.GetEnvironmentVariable("CLAUDE_CODE_SESSION_ID");
-            return Path.Combine(Path.GetTempPath(), "edit-md", string.IsNullOrWhiteSpace(session) ? "default" : session);
+            return Path.Combine(BuildChannel.Current.StateRoot, string.IsNullOrWhiteSpace(session) ? "default" : session);
         }
     }
 

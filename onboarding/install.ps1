@@ -6,10 +6,28 @@
 param(
     [string]$ClaudeHome = ($env:CLAUDE_CONFIG_DIR ? $env:CLAUDE_CONFIG_DIR : (Join-Path $HOME '.claude')),
     [string]$ToolHome = '',
-    [string]$Rid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+    [string]$Rid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier,
+    [string]$Ref = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..')
+
+# -Ref installs a named commit with that commit's own installer, built in a temporary worktree,
+# so uncommitted or half-done work never reaches the release, and the binary and its SKILL.md come from one commit (plan 19).
+if ($Ref) {
+    $worktree = Join-Path ([IO.Path]::GetTempPath()) "edit-md-release-$(Get-Random)"
+    & git -C $repo worktree add --detach $worktree $Ref
+    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+    try {
+        & (Join-Path $worktree 'onboarding' 'install.ps1') -ClaudeHome $ClaudeHome -ToolHome $ToolHome -Rid $Rid
+        $installExitCode = $LASTEXITCODE
+    }
+    finally {
+        & git -C $repo worktree remove --force $worktree
+    }
+    exit $installExitCode
+}
+
 $skillSource = Join-Path $PSScriptRoot 'skills' 'edit-md' 'SKILL.md'
 $skillsRoot = Join-Path $ClaudeHome 'skills'
 $skillTarget = Join-Path $skillsRoot 'edit-md'

@@ -78,6 +78,7 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 #bar button { flex-shrink: 0; white-space: nowrap; }
 #file { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 #saved-at { flex: none; font-size: 11px; color: var(--muted); white-space: nowrap; }
+#build { flex: none; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: #ffffff; background: #d97706; cursor: help; }
 #submit, #apply-silent { padding: 5px 14px; font-weight: 600; }
 #apply-silent { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 #apply-silent:hover { background: color-mix(in srgb, var(--accent) 24%, transparent); }

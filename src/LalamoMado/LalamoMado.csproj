@@ -8,7 +8,14 @@
     <AssemblyName>edit-md</AssemblyName>
     <RootNamespace>LalamoMado</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <EditMdChannel Condition="'$(EditMdChannel)' == ''">release</EditMdChannel>
   </PropertyGroup>
+
+  <!-- Plan 19: the build knows whether it is the release or the dev build, so its homes and ports never meet the other's. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="EditMdChannel" Value="$(EditMdChannel)" />
+    <AssemblyMetadata Include="EditMdCommit" Value="$(EditMdCommit)" />
+  </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

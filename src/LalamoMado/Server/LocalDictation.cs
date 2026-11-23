@@ -40,10 +40,15 @@ public sealed class LocalDictation(string home)
     readonly SemaphoreSlim oneAtATime = new(1, 1);
     string? problem;
 
-    public static string NextTo(string preferencesPath) =>
-        Environment.GetEnvironmentVariable("EDIT_MD_WHISPER") is { Length: > 0 } custom
-            ? custom
-            : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(preferencesPath))!, "whisper");
+    /// <summary>The dev build reads the released build's models when it has none of its own: 2–4 GB, and only ever read.</summary>
+    public static string NextTo(string preferencesPath)
+    {
+        if (Environment.GetEnvironmentVariable("EDIT_MD_WHISPER") is { Length: > 0 } custom)
+            return custom;
+        var own = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(preferencesPath))!, "whisper");
+        var released = Path.Combine(BuildChannel.Release.DefaultToolHome, "whisper");
+        return BuildChannel.Current == BuildChannel.Dev && !Directory.Exists(own) && Directory.Exists(released) ? released : own;
+    }
 
     public DictationStatus Status()
     {

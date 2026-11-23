@@ -20,6 +20,7 @@ In such a repo `bin/` must be git-ignored (an allowlist `.gitignore` starting wi
 Nothing else is installed: **no rules**, no settings, no hooks, no CLAUDE.md edits.
 The installer commits nothing; if `~/.claude` is a git repo, tracking `skills/edit-md/SKILL.md` is the user's call.
 Do not copy this repo's `.claude/` contents (e.g. `project-planner-repo`) — that is tooling for developing edit-md, not for using it.
+The same goes for `scripts/deploy-dev.ps1` and the `/edit-md-dev` skill it writes: the dev build, for whoever works on edit-md itself.
 
 The skill is user-invoked only (`disable-model-invocation: true`): the user types `/edit-md <path>`; the agent never starts a review on its own.
 Its base copy is `onboarding/skills/edit-md/SKILL.md` in this repo.
@@ -36,7 +37,7 @@ If one is missing, tell the user what to install and stop.
 ## Install
 1. Get the repo if it is not already checked out: `git clone https://github.com/mrJC0/lalamo-mado.git`.
 2. From the repo root: `pwsh onboarding/install.ps1`.
-   Options: `-ToolHome <dir>` for the binary (default `<ClaudeHome>/bin/edit-md`; the installed `SKILL.md` is rewritten to match), `-ClaudeHome <dir>` for a non-default config dir, `-Rid <rid>` to build for another platform.
+   Options: `-ToolHome <dir>` for the binary (default `<ClaudeHome>/bin/edit-md`; the installed `SKILL.md` is rewritten to match), `-ClaudeHome <dir>` for a non-default config dir, `-Rid <rid>` to build for another platform, `-Ref <commit or tag>` to install that commit, built in a temporary git worktree with its own installer, rather than the checkout as it stands.
    It stops any running edit-md, publishes the binary into `<ToolHome>`, writes `SKILL.md`, and removes a `bin/` that older installs left inside the skill folder.
 3. Check its JSON output:
    - `skillFiles` is exactly `["SKILL.md"]`;
