@@ -1,0 +1,8 @@
+{
+  "terms": ["edit-md", "seek", "mark", "Send now", "Local", "Chrome"],
+  "mishearings": {
+    "EditMD": "edit-md",
+    "Louklo": "Local",
+    "secret results": "seek results"
+  }
+}

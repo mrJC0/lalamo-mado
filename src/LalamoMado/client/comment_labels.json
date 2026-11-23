@@ -1,0 +1,26 @@
+{
+  "labels": [
+    { "id": "comment", "icon": "💬", "name": "Comment", "color": "#eab308",
+      "description": "A remark. Act on it if it asks for something; otherwise acknowledge it." },
+    { "id": "question", "icon": "❓", "name": "Question", "color": "#8b5cf6", "hotkey": 4,
+      "description": "Answer it in the page; do not edit the file for it." },
+    { "id": "change", "icon": "✏️", "name": "Change", "color": "#14b8a6",
+      "description": "Rewrite the quoted text as the comment describes." },
+    { "id": "remove", "icon": "🗑️", "name": "Remove", "color": "#ef4444", "highlight": "remove",
+      "description": "Delete the quoted text." },
+    { "id": "insert", "icon": "➕", "name": "Insert here", "color": "#06b6d4", "point": true,
+      "description": "Insert the comment's text at this point." },
+    { "id": "good", "icon": "👍", "name": "Looks good", "color": "#22c55e", "hotkey": 5,
+      "description": "Approved as it stands; change nothing." },
+    { "id": "reject", "icon": "👎", "name": "Not this", "color": "#f97316", "hotkey": 6,
+      "description": "Rejected as it stands; drop it, or propose another way if one is obvious." },
+    { "id": "seek", "icon": "🔍", "name": "Seek", "color": "#3b82f6",
+      "description": "Find in the document what the comment describes and answer by highlighting it: a mark set named \"seek: …\", one mark per finding with a short note, listed in the left pane. Reply in one line only, saying how many were found." },
+    { "id": "setting", "icon": "⚙️", "name": "Setting", "color": "#64748b", "hidden": true,
+      "description": "Change or add a setting of edit-md itself. Find it with `edit-md settings` and change it with `edit-md settings --set KEY=VALUE`, kept for this PC unless the comment asks for the repo; the open page shows it at once. When no setting fits, reply with the setting you would add instead of changing code." },
+    { "id": "customize-page", "icon": "🎨", "name": "Customize the page", "color": "#db2777", "hidden": true,
+      "description": "Change how the review page itself looks or behaves, cosmetic or deeper. Copy each file you change from the installed client (`~/.claude/bin/edit-md/client/`) into the overlay folder `~/.claude/edit-md/client/` and edit the copy there: the server serves it instead, and a reinstall keeps it. Reply with the files you changed; a reload shows them." },
+    { "id": "new-kind", "icon": "🏷️", "name": "New comment kind", "color": "#0891b2", "hidden": true,
+      "description": "Add a comment kind, a label: write it into the repo's `<git root>/.claude/edit-md/comment_labels.json`, or into `~/.claude/edit-md/comment_labels.json` when the comment says it is the reviewer's own, and check it with `edit-md labels <docId>`. Reply with what it does; a reload shows it." }
+  ]
+}

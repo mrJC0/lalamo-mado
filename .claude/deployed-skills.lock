@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "project-planner-repo": {
+      "source": "project-planner",
+      "hash": "adc53cb519f11b778dff06d3d2aec45a7db9a335",
+      "unsilenced": true,
+      "deployed": "2026-10-20"
+    }
+  }
+}

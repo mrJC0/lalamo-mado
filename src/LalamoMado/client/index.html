@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>edit-md</title>
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header id="bar">
+    <button id="outline-toggle" type="button" aria-controls="left" aria-expanded="true" title="Show or hide the outline">☰</button>
+    <span id="link" class="link" title="connecting…"></span>
+    <strong id="file">edit-md</strong>
+    <span id="saved-at" hidden></span>
+    <button id="changes-toggle" type="button" aria-pressed="true" hidden title="Show or hide the marks of what changed since you last saw this document">Changes</button>
+    <span class="spacer"></span>
+    <span id="banner" role="status" hidden></span>
+    <button id="stamp-toggle" type="button" title="Label stamp: pick a label, then click blocks until you tap Alt or press Esc — Ctrl+Shift, tapped; tapped twice repeats the last label">🏷</button>
+    <button id="general" type="button" title="A comment on the document as a whole">+ General</button>
+    <button id="send-drafts" type="button" disabled title="Send every draft to the agent as one group, without a reply, and keep reviewing">Send drafts</button>
+    <span id="runs-warning" hidden></span>
+    <span class="divider" aria-hidden="true"></span>
+    <button id="apply-silent" type="button" hidden>Apply silently</button>
+    <button id="submit" type="button" class="primary">Approve</button>
+    <button id="settings-toggle" type="button" aria-controls="settings" aria-expanded="false" title="Settings">⚙</button>
+  </header>
+
+  <div id="settings" role="dialog" aria-label="Settings" hidden>
+    <p class="settings-banner">Settings are best changed by asking the agent — say what you want in the chat, or below.</p>
+    <button id="setting-ask" type="button" class="primary" data-ask="setting" title="Opens a comment on the whole document of the kind ⚙ Setting: say what you want changed or added, and the agent finds the setting, changes it, and the page shows it">⚙ Ask for a setting…</button>
+    <input id="settings-search" type="search" placeholder="Search settings" aria-label="Search settings" title="Filters the settings by their names and descriptions">
+    <div id="settings-sections"></div>
+    <p id="settings-none" class="muted" hidden>No setting matches.</p>
+    <p id="setting-glossary" hidden></p>
+    <fieldset class="setting-section setting-expert">
+      <legend>Expert</legend>
+      <p class="setting-note">Here the agent changes edit-md itself: the page's own files, as copies in your overlay folder that a reinstall keeps, or the kinds of comment.</p>
+      <div class="setting-gateways">
+        <button type="button" data-ask="customize-page" title="Opens a comment of the kind 🎨 Customize the page: say how the page should look or behave, and the agent changes copies of its files in your overlay folder">🎨 Customize the page…</button>
+        <button type="button" data-ask="new-kind" title="Opens a comment of the kind 🏷 New comment kind: describe the label you want, and the agent adds it to the repo's list or yours">🏷 New comment kind…</button>
+      </div>
+    </fieldset>
+    <button id="setting-reset-popup" type="button">Reset kept popup positions</button>
+  </div>
+
+  <div id="layout">
+    <aside id="left" aria-label="Outline">
+      <div class="pane-body">
+        <div class="pane-head">
+          <h2>Outline</h2>
+          <button id="seek" type="button" title="Ask the agent to find something in the document: describe what you want to see, and it highlights every place it finds, as a set listed here">🔍 Seek</button>
+          <div id="outline-filters" role="group" aria-label="Show in the pane" hidden></div>
+        </div>
+        <p id="outline-empty" class="muted" hidden>No headings.</p>
+        <ol id="outline-preamble" class="section-items"></ol>
+        <ol id="outline"></ol>
+      </div>
+      <div class="pane-edge" data-pane="left" title="Drag to resize · double-click to fit the content"></div>
+    </aside>
+    <main id="page">
+      <article id="doc" class="markdown"></article>
+      <div id="doc-end" aria-hidden="true">end of document</div>
+      <div id="marks" aria-hidden="true"></div>
+      <div id="change-marks" aria-hidden="true"></div>
+      <div id="mark-ticks"></div>
+      <div id="block-outline" hidden aria-hidden="true"></div>
+    </main>
+    <aside id="side">
+      <div class="pane-body">
+        <section id="agent" hidden>
+          <h2>From the agent</h2>
+          <ol id="agent-messages"></ol>
+        </section>
+        <section>
+          <div class="side-head">
+            <label id="compact-box" title="One line per annotation: its label, id, state and the start of your comment; replies and buttons hide"><input id="compact" type="checkbox"> Compact</label>
+            <label id="replies-only-box" title="Show only the annotations the agent replied to"><input id="replies-only" type="checkbox"> Replies</label>
+          </div>
+          <select id="order" aria-label="Order the annotations">
+            <option value="document">Document order</option>
+            <option value="created">Newest first</option>
+            <option value="edited">Last edited</option>
+          </select>
+          <p id="empty" class="muted">Select text in the document to annotate it.</p>
+          <ol id="annotations"></ol>
+        </section>
+      </div>
+      <div class="pane-edge" data-pane="side" title="Drag to resize · double-click to reset"></div>
+    </aside>
+  </div>
+
+  <form id="popover" hidden>
+    <div class="labels" role="group" aria-label="Labels"></div>
+    <textarea rows="4" placeholder="Comment — Ctrl+Enter adds, Ctrl+Shift+Enter sends now, Ctrl+Space — skills"></textarea>
+    <div class="fix-suggestion" hidden>
+      <p class="fix-text"></p>
+      <div class="fix-actions"><button type="button" data-act="fix-use">Use</button><button type="button" data-act="fix-dismiss">Dismiss</button></div>
+    </div>
+    <div class="remember" hidden></div>
+    <div class="send-slot"></div>
+    <div class="actions">
+      <button type="button" data-act="cancel">Cancel</button>
+      <button type="button" class="mic" aria-pressed="false" title="Dictate — Ctrl+D starts and stops" hidden>🎤</button>
+      <button type="button" class="mic-language" title="Dictation language" hidden>CZ</button>
+      <button type="button" class="fix" title="Fix with agent: it corrects misheard words against the document and suggests the text back">✨ Fix</button>
+      <button type="button" class="skills-toggle" title="Name a skill: lists the repo's and your own, and inserts its name at the cursor">/ Skills · Ctrl+Space</button>
+      <span class="spacer"></span>
+      <button type="button" class="place-toggle" aria-controls="place-menu" aria-expanded="false" title="Where this popup opens">⤢ Place</button>
+      <span class="spacer"></span>
+      <button type="button" data-act="send" title="Send to the agent right away and get a reply in the page">Send now</button>
+      <button type="submit" class="primary">Add</button>
+    </div>
+    <div id="place-menu" class="place-menu" role="menu" hidden>
+      <p>Drag the popup by any empty spot and resize it from its edges. Keep the place you set for <strong class="variant-name">in-text comments</strong>:</p>
+      <button type="button" role="menuitem" data-act="keep" data-scope="document">For this document <span>only when reviewing this file</span></button>
+      <button type="button" role="menuitem" data-act="keep" data-scope="session">For this session <span>until this Claude session ends</span></button>
+      <button type="button" role="menuitem" data-act="keep" data-scope="pc">For this PC <span>every review, every session</span></button>
+      <button type="button" role="menuitem" data-act="reset">Back to the default <span>the lower third of the document column; forgets the kept places</span></button>
+      <p class="muted">The most specific kept place wins: document, then session, then PC. Scrolling the selection above the popup is switched under ⚙.</p>
+    </div>
+    <div class="pop-edge" data-edge="n"></div><div class="pop-edge" data-edge="s"></div>
+    <div class="pop-edge" data-edge="e"></div><div class="pop-edge" data-edge="w"></div>
+    <div class="pop-edge" data-edge="ne"></div><div class="pop-edge" data-edge="nw"></div>
+    <div class="pop-edge" data-edge="se"></div><div class="pop-edge" data-edge="sw"></div>
+  </form>
+
+  <div id="label-palette" role="dialog" aria-label="Pick a label to stamp" hidden>
+    <div class="palette-grid"></div>
+    <p class="palette-description"></p>
+  </div>
+  <div id="armed-icon" aria-hidden="true" hidden></div>
+
+  <div id="skill-picker" role="dialog" aria-label="Name a skill" hidden>
+    <div class="skill-box">
+      <div class="skill-head">
+        <input type="text" placeholder="Search by characters, like smfc" aria-label="Search the skills" spellcheck="false" autocomplete="off">
+        <p class="skill-note"></p>
+      </div>
+      <div class="skill-body">
+        <div class="skill-sections">
+          <section data-source="repo"><h3>Repo <span class="skill-count"></span></h3><div class="skill-list"></div></section>
+          <section data-source="user"><h3>User <span class="skill-count"></span></h3><div class="skill-list"></div></section>
+        </div>
+        <aside class="skill-description"></aside>
+      </div>
+    </div>
+  </div>
+
+  <section id="thread-panel" role="dialog" aria-label="Thread" hidden>
+    <header class="thread-head">
+      <strong class="thread-title"></strong>
+      <span class="spacer"></span>
+      <button type="button" class="place-toggle" aria-expanded="false" title="Where this panel opens">⤢ Place</button>
+      <button type="button" data-act="close" title="Close — Esc">×</button>
+    </header>
+    <div class="thread-turns"></div>
+    <form class="thread-reply">
+      <textarea rows="2" placeholder="Follow-up — Ctrl+Enter sends, Ctrl+Space — skills"></textarea>
+      <div class="remember" hidden></div>
+      <div class="actions">
+        <button type="button" class="mic" aria-pressed="false" title="Dictate — Ctrl+D starts and stops" hidden>🎤</button>
+        <button type="button" class="mic-language" title="Dictation language" hidden>CZ</button>
+        <button type="button" class="skills-toggle" title="Name a skill: lists the repo's and your own, and inserts its name at the cursor">/ Skills · Ctrl+Space</button>
+        <span class="spacer"></span>
+        <button type="submit" class="primary">Send</button>
+      </div>
+    </form>
+    <div class="place-menu" role="menu" hidden>
+      <p>Drag the panel by any empty spot and resize it from its edges. Keep the place you set:</p>
+      <button type="button" role="menuitem" data-act="keep" data-scope="document">For this document <span>only when reviewing this file</span></button>
+      <button type="button" role="menuitem" data-act="keep" data-scope="session">For this session <span>until this Claude session ends</span></button>
+      <button type="button" role="menuitem" data-act="keep" data-scope="pc">For this PC <span>every review, every session</span></button>
+      <button type="button" role="menuitem" data-act="reset">Back to the default <span>the upper two thirds of the document column; forgets the kept places</span></button>
+    </div>
+    <div class="pop-edge" data-edge="n"></div><div class="pop-edge" data-edge="s"></div>
+    <div class="pop-edge" data-edge="e"></div><div class="pop-edge" data-edge="w"></div>
+    <div class="pop-edge" data-edge="ne"></div><div class="pop-edge" data-edge="nw"></div>
+    <div class="pop-edge" data-edge="se"></div><div class="pop-edge" data-edge="sw"></div>
+  </section>
+
+  <div id="thread-card" role="dialog" aria-label="Thread" hidden>
+    <div class="thread-turns"></div>
+    <div class="actions">
+      <button type="button" data-act="reply">Reply</button>
+      <button type="button" data-act="expand" title="Open the whole thread in the large panel">⤢</button>
+      <span class="spacer"></span>
+      <button type="button" data-act="close" title="Close — Esc">×</button>
+    </div>
+  </div>
+</body>
+</html>

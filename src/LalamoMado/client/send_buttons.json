@@ -1,0 +1,14 @@
+{
+  "buttons": [
+    { "id": "session", "icon": "💬", "name": "Session", "by": "session",
+      "description": "The session agent answers, in its own context." },
+    { "id": "blank", "icon": "🧊", "name": "Blank", "by": "new",
+      "description": "A separate run with nothing loaded: only the request and the file." },
+    { "id": "repo", "icon": "📁", "name": "Repo", "by": "new", "repo": true,
+      "description": "A separate run with the repo's and your CLAUDE.md and rules." },
+    { "id": "brief", "icon": "📝", "name": "Brief", "by": "brief",
+      "description": "The session agent writes a brief, and a separate run answers from it." },
+    { "id": "do-it", "icon": "🔨", "name": "Do it", "by": "new", "repo": true, "edit": true,
+      "description": "A separate run with the repo's context that edits files itself, at once. The session will not know." }
+  ]
+}

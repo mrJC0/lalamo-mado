@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "rules": {
+    "use-project-planner.md": {
+      "source": "use-project-planner",
+      "hash": "afad90ece77f978df7b4dbf7890a40d6c382e227",
+      "deployed": "2026-10-20"
+    },
+    "use-project-journal-instead-of-auto-memory.md": {
+      "source": "use-project-journal-instead-of-auto-memory",
+      "hash": "b5580c014ceb5721e04529b1f744eff816484804",
+      "deployed": "2026-10-20"
+    }
+  }
+}
